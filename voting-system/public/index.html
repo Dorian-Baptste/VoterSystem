@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Voting System</title>
+    <link rel="stylesheet" href="/css/styles.css">
+    <script src="https://cdn.socket.io/4.0.1/socket.io.min.js"></script>
+</head>
+<body>
+    <div class="container">
+        <h1>Welcome to the Voting System</h1>
+        <form id="voteForm">
+            <h3>Select your candidate</h3>
+            <label>
+                <input type="radio" name="candidate" value="1"> John Doe (Party A)
+            </label><br>
+            <label>
+                <input type="radio" name="candidate" value="2"> Jane Smith (Party A)
+            </label><br>
+            <label>
+                <input type="radio" name="candidate" value="3"> Mark Johnson (Party B)
+            </label><br>
+            <label>
+                <input type="radio" name="candidate" value="4"> Sarah Brown (Party B)
+            </label><br>
+            <button type="submit">Submit Vote</button>
+        </form>
+
+        <div id="voteResults">
+            <h3>Current Vote Counts</h3>
+            <ul>
+                <li>John Doe: <span id="voteA1">0</span></li>
+                <li>Jane Smith: <span id="voteA2">0</span></li>
+                <li>Mark Johnson: <span id="voteB1">0</span></li>
+                <li>Sarah Brown: <span id="voteB2">0</span></li>
+            </ul>
+        </div>
+    </div>
+
+    <script src="/js/main.js"></script>
+</body>
+</html>
