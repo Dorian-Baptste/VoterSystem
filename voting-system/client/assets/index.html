@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Voting System</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="node_modules/bootstrap/dist/css/bootstrap.min.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Welcome to the Voting System</h1>
+        
+        <!-- Registration Form -->
+        <form id="registration-form">
+            <input type="text" id="first-name" placeholder="First Name" required><br>
+            <input type="text" id="last-name" placeholder="Last Name" required><br>
+            <input type="text" id="address" placeholder="Address" required><br>
+            <button type="submit">Register</button>
+        </form>
+        
+        <!-- Voting Section -->
+        <div id="vote-section" style="display:none;">
+            <h2>Select Your Candidate</h2>
+            <button class="vote-btn" data-candidate="1">John Doe</button>
+            <button class="vote-btn" data-candidate="2">Jane Smith</button>
+            <button class="vote-btn" data-candidate="3">Mark Johnson</button>
+            <button class="vote-btn" data-candidate="4">Sarah Brown</button>
+        </div>
+        
+        <!-- Real-Time Vote Count -->
+        <div id="vote-count">
+            <h3>Vote Count:</h3>
+            <ul id="candidate-vote-counts">
+                <li>John Doe: 0</li>
+                <li>Jane Smith: 0</li>
+                <li>Mark Johnson: 0</li>
+                <li>Sarah Brown: 0</li>
+            </ul>
+        </div>
+        
+        <!-- Map Section -->
+        <div id="map"></div>
+    </div>
+
+    <script src="js/script.js"></script>
+</body>
+</html>
