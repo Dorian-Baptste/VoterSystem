@@ -47,6 +47,7 @@ GOOGLE_MAPS_API_KEY=your_google_maps_api_key
 Replace `your_google_maps_api_key` with your actual Google Maps API key.
 
 ### 4. Start the application
+before running the server make sure you are in the voting-system file path
 To run the server, use:
 ```sh
 npm start
