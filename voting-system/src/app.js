@@ -8,6 +8,9 @@ const app = express();
 const server = http.createServer(app);
 const io = socketIo(server);
 
+// In-memory vote counts (ideally, you'd persist this in a database)
+let voteCounts = { 1: 0, 2: 0, 3: 0, 4: 0 };
+
 // Middleware
 app.use(express.json());
 app.use(express.static("public"));
@@ -22,8 +25,18 @@ io.on("connection", (socket) => {
 
   // Handle vote submission
   socket.on("submitVote", (voteData) => {
-    // Emit new vote counts to all connected clients
-    io.emit("voteCounts", voteData);
+    const candidateId = voteData.candidateId;
+
+    // Update the vote count for the selected candidate
+    if (voteCounts[candidateId] !== undefined) {
+      voteCounts[candidateId]++;
+      console.log(
+        `Vote received for candidate ${candidateId}. Total votes: ${voteCounts[candidateId]}`
+      );
+    }
+
+    // Emit updated vote counts to all connected clients
+    io.emit("voteCounts", voteCounts);
   });
 
   socket.on("disconnect", () => {
