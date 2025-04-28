@@ -39,14 +39,7 @@ To install `nodemon` (for development):
 npm install nodemon --save-dev
 ```
 
-### 3. Set up environment variables
-Create a `.env` file in the root directory and add:
-```env
-GOOGLE_MAPS_API_KEY=your_google_maps_api_key
-```
-Replace `your_google_maps_api_key` with your actual Google Maps API key.
-
-### 4. Start the application
+### 3. Start the application
 before running the server make sure you are in the voting-system file path
 To run the server, use:
 ```sh
