@@ -115,6 +115,13 @@ Before you begin, ensure you have the following installed and configured:
         ]);
         ```
     * Verify with `db.candidates.find();` and exit (`.exit`).
+    
+    **To reset the Data**
+    * Open the MongoDB Shell: `mongosh`
+    * Switch to the database: `use votingSystem`
+    * Drop the database: `db.dropDatabase();`
+    * (OPTIONAL use only if you want to clear the user cahce and/or doing a full reset):
+        * Remove users: `db.dropAllUsers();`
 
 3.  **Start the Node.js Server:**
     * **Development Mode (recommended):** Uses `nodemon` for auto-restarts on file changes.
