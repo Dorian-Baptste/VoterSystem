@@ -114,32 +114,28 @@ Before you begin, ensure you have the following installed and configured:
             firstName: "Marcus",
             lastName: "Ching",
             party: "Party A",
-            // Replace with actual image URL
-            imageUrl: "[https://via.placeholder.com/100/A00/FFF?text=MC](https://via.placeholder.com/100/A00/FFF?text=MC)"
+            imageUrl: "[https://lh4.googleusercontent.com/proxy/J0E_Di1ggQTeLHAQAl0SDU6hyDXS8yk-1YzC4yTttJDeY-VZf1jAALQj5BsrhimTjPIj9BhVlzJxUZB441j8wpSoDMDVC317afEjyCBgcsPUTw]"
           },
           {
             candidateId: 2,
             firstName: "Darius",
-            lastName: "", // Add last name if applicable
+            lastName: "",
             party: "Party A",
-            // Replace with actual image URL
-            imageUrl: "[https://via.placeholder.com/100/0A0/FFF?text=D](https://via.placeholder.com/100/0A0/FFF?text=D)"
+            imageUrl: "[https://img.freepik.com/premium-photo/black-child-with-afro-happy-having-fun-white-background-pixar-style2_27550-4938.jpg]"
            },
           {
             candidateId: 3,
             firstName: "Diddy",
             lastName: "Dhanraj",
             party: "Party B",
-            // Replace with actual image URL
-            imageUrl: "[https://via.placeholder.com/100/00A/FFF?text=DD](https://via.placeholder.com/100/00A/FFF?text=DD)"
+            imageUrl: "[https://upload.wikimedia.org/wikipedia/en/6/67/Herbert_-_Family_Guy.png]"
           },
           {
             candidateId: 4,
             firstName: "Bombardino",
             lastName: "Crocodilo",
             party: "Party B",
-            // Replace with actual image URL
-            imageUrl: "[https://via.placeholder.com/100/A50/FFF?text=BC](https://via.placeholder.com/100/A50/FFF?text=BC)"
+            imageUrl: "[https://static.wikia.nocookie.net/brainrotnew/images/1/10/Bombardiro_Crocodilo.jpg/revision/latest?cb=20250417102447]"
           }
         ]);
         ```
