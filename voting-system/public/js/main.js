@@ -20,7 +20,7 @@ const candidateListDiv = document.getElementById("candidateList");
 const voteMessage = document.getElementById("voteMessage");
 const welcomeVoterP = document.getElementById("welcomeVoter");
 
-const resultsSection = document.getElementById("resultsSection");
+const resultsSection = document.getElementById("resultsSection"); // Get reference for visibility
 const voteResultsList = document.getElementById("voteResultsList");
 
 const registerAgainButton = document.getElementById("registerAgainButton");
@@ -29,7 +29,6 @@ const registerAgainButton = document.getElementById("registerAgainButton");
 
 // Initialize Leaflet Map
 function initializeMap(lat, lng, addressString) {
-  // ... (keep as is) ...
   if (map) {
     map.setView([lat, lng], 15);
   } else {
@@ -41,6 +40,7 @@ function initializeMap(lat, lng, addressString) {
     }).addTo(map);
     map.getContainer().setAttribute("role", "application");
   }
+
   if (marker) {
     marker.setLatLng([lat, lng]);
   } else {
@@ -55,30 +55,30 @@ function initializeMap(lat, lng, addressString) {
 
 // Fetch Candidates and Populate Form AND Results Structure
 async function fetchAndDisplayCandidates() {
-  console.log("Running fetchAndDisplayCandidates..."); // <-- ADD LOG (General Entry)
-  // Reset flags and UI elements related to candidates/results
-  isResultsStructureBuilt = false; // Reset flag before fetching
+  console.log("Running fetchAndDisplayCandidates..."); // Log fetch start
+  isResultsStructureBuilt = false;
   candidateListDiv.innerHTML = "<p>Loading candidates...</p>";
-  voteResultsList.innerHTML = "<li>Loading results...</li>"; // Show loading in results too
+  // Results list content is reset here, but visibility is handled elsewhere
+  voteResultsList.innerHTML = "<li>Loading results...</li>";
 
   try {
-    console.log("FETCH: Fetching candidates from /api/candidates..."); // <-- ADD LOG
+    console.log("FETCH: Fetching candidates from /api/candidates...");
     const response = await fetch("/api/candidates");
     if (!response.ok) {
-      console.error(`FETCH: HTTP error! status: ${response.status}`); // <-- ADD LOG
+      console.error(`FETCH: HTTP error! status: ${response.status}`);
       throw new Error(`HTTP error! status: ${response.status}`);
     }
     const candidates = await response.json();
-    console.log("FETCH: Candidates received:", candidates); // <-- ADD LOG
+    console.log("FETCH: Candidates received:", candidates);
 
     // --- Populate Candidate Voting List ---
     candidateListDiv.innerHTML = ""; // Clear loading message
     if (candidates.length === 0) {
-      console.log("FETCH: No candidates found in response."); // <-- ADD LOG
+      console.log("FETCH: No candidates found in response.");
       candidateListDiv.innerHTML =
         '<p class="text-warning">No candidates found.</p>';
       voteResultsList.innerHTML = "<li>No candidates found.</li>";
-      isResultsStructureBuilt = false; // Still false as structure failed
+      isResultsStructureBuilt = false;
       return;
     }
 
@@ -98,20 +98,20 @@ async function fetchAndDisplayCandidates() {
     });
 
     // --- Build the initial results display structure ---
-    console.log("FETCH: Building initial results structure..."); // <-- ADD LOG
-    updateVoteResultsDisplay(null, candidates); // Pass candidates for initial structure
+    console.log("FETCH: Building initial results structure...");
+    updateVoteResultsDisplay(null, candidates);
 
     // --- Set Flag and Request Counts (ONLY AFTER structure is built) ---
-    console.log("FETCH: Setting isResultsStructureBuilt = true"); // <-- ADD LOG
+    console.log("FETCH: Setting isResultsStructureBuilt = true");
     isResultsStructureBuilt = true;
-    console.log("FETCH: Emitting getInitialCounts."); // <-- ADD LOG
-    socket.emit("getInitialCounts"); // Ask for counts *after* building HTML
+    console.log("FETCH: Emitting getInitialCounts.");
+    socket.emit("getInitialCounts");
   } catch (error) {
-    console.error("FETCH: Error fetching or displaying candidates:", error); // <-- ADD LOG
+    console.error("FETCH: Error fetching or displaying candidates:", error);
     candidateListDiv.innerHTML =
       '<p class="text-danger">Could not load candidates.</p>';
     voteResultsList.innerHTML = "<li>Error loading candidate results.</li>";
-    isResultsStructureBuilt = false; // Ensure flag is false on error
+    isResultsStructureBuilt = false;
   }
 }
 
@@ -119,14 +119,13 @@ async function fetchAndDisplayCandidates() {
 function updateVoteResultsDisplay(voteCounts, candidates = []) {
   // Build initial structure
   if (voteCounts === null) {
-    voteResultsList.innerHTML = ""; // Clear loading/error message
+    voteResultsList.innerHTML = "";
     if (candidates.length === 0) {
       voteResultsList.innerHTML =
         "<li>No candidates available to display results.</li>";
-      // isResultsStructureBuilt = false; // Flag set by caller
       return;
     }
-    console.log("UPDATE_DISPLAY: Building initial structure for results list."); // <-- ADD LOG
+    console.log("UPDATE_DISPLAY: Building initial structure for results list.");
     candidates.forEach((candidate) => {
       const candidateIdentifier = candidate.candidateId || candidate._id;
       const li = document.createElement("li");
@@ -136,25 +135,29 @@ function updateVoteResultsDisplay(voteCounts, candidates = []) {
       }: `;
       const countSpan = document.createElement("span");
       countSpan.id = `votes-${candidateIdentifier}`;
-      countSpan.textContent = "0"; // Initial count
+      countSpan.textContent = "0";
       li.appendChild(nameSpan);
       li.appendChild(countSpan);
       voteResultsList.appendChild(li);
     });
-    // Setting flag here might be redundant if fetchAndDisplayCandidates sets it, but safe
-    // isResultsStructureBuilt = true; // Let fetchAndDisplayCandidates control setting it TRUE
+    // Don't set flag here, let caller do it
   }
   // Update counts using received data
   else {
-    console.log("UPDATE_DISPLAY: Received voteCounts event with:", voteCounts); // <-- ADD LOG
+    console.log("UPDATE_DISPLAY: Received voteCounts event with:", voteCounts);
+    // If the structure isn't ready when counts arrive, we might miss the first update
+    // but subsequent updates (after voting) will work. The structure should be ready
+    // because we now wait for it before emitting getInitialCounts.
     if (!isResultsStructureBuilt) {
       console.warn(
         "UPDATE_DISPLAY: isResultsStructureBuilt is FALSE. Ignoring update."
-      ); // <-- ADD LOG
+      );
       return;
     }
 
-    console.log("UPDATE_DISPLAY: Updating counts with data:", voteCounts); // <-- ADD LOG
+    console.log("UPDATE_DISPLAY: Updating counts with data:", voteCounts);
+    // No need to explicitly show results section here, visibility handled elsewhere
+
     for (const candidateId in voteCounts) {
       const countSpan = document.getElementById(`votes-${candidateId}`);
       if (countSpan) {
@@ -162,7 +165,7 @@ function updateVoteResultsDisplay(voteCounts, candidates = []) {
       } else {
         console.warn(
           `UPDATE_DISPLAY: Count span for candidate ID ${candidateId} not found during update.`
-        ); // <-- ADD LOG
+        );
       }
     }
   }
@@ -170,11 +173,13 @@ function updateVoteResultsDisplay(voteCounts, candidates = []) {
 
 // Function to reset the UI back to the registration state
 function resetToRegisterState() {
-  console.log("RESET: Resetting UI to registration state."); // <-- ADD LOG
+  console.log("RESET: Resetting UI to registration state.");
   votingSection.style.display = "none";
   mapContainer.style.display = "none";
   registerAgainButton.classList.add("d-none");
   registrationSection.style.display = "block";
+  resultsSection.classList.add("d-none"); // Hide results section on reset
+
   registrationMessage.textContent = "";
   registrationMessage.className = "";
   voteMessage.textContent = "";
@@ -185,13 +190,14 @@ function resetToRegisterState() {
     .querySelectorAll("input, button")
     .forEach((el) => (el.disabled = false));
   currentVoterId = null;
+
   // Reset displays and flag
   candidateListDiv.innerHTML = "<p>Loading candidates...</p>";
-  voteResultsList.innerHTML = "<li>Loading results...</li>";
+  voteResultsList.innerHTML = "<li>Loading results...</li>"; // Reset results text
   isResultsStructureBuilt = false; // Reset flag
 
-  // After resetting, immediately start fetching candidates and counts for the new view
-  console.log("RESET: Triggering fetchAndDisplayCandidates after reset."); // <-- ADD LOG
+  // Trigger fetching candidates again for the next session's structure build
+  console.log("RESET: Triggering fetchAndDisplayCandidates after reset.");
   fetchAndDisplayCandidates();
 }
 
@@ -199,25 +205,30 @@ function resetToRegisterState() {
 
 // Handle Registration Form Submission
 registerForm.addEventListener("submit", async (e) => {
-  // ... (keep as is) ...
   e.preventDefault();
   console.log("Registration form submitted.");
   registrationMessage.textContent = "Registering and verifying address...";
   mapContainer.style.display = "none";
+  resultsSection.classList.add("d-none"); // Ensure results are hidden
+
   const formData = new FormData(registerForm);
   const data = Object.fromEntries(formData.entries());
+
   try {
     const response = await fetch("/api/users/register", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(data),
     });
+
     const result = await response.json();
+
     if (response.ok) {
       console.log("Registration successful:", result);
       currentVoterId = result.userId;
       registrationMessage.textContent = `Registration successful! Welcome ${data.firstName}. Your Voter ID: ${currentVoterId}`;
       registrationMessage.className = "alert alert-success";
+
       if (result.latitude && result.longitude) {
         const fullAddress = `${data.address}, ${data.city}, ${data.state} ${data.zip}`;
         initializeMap(result.latitude, result.longitude, fullAddress);
@@ -225,10 +236,16 @@ registerForm.addEventListener("submit", async (e) => {
         console.warn("Geolocation data missing in registration response.");
         mapContainer.style.display = "none";
       }
+
       welcomeVoterP.textContent = `Welcome, ${data.firstName}! Please cast your vote.`;
       votingSection.style.display = "block";
-      /* await fetchAndDisplayCandidates(); // Removed */ registrationSection.style.display =
-        "none";
+      // --- CHANGE: DO NOT SHOW RESULTS SECTION HERE ---
+      // resultsSection.classList.remove("d-none"); // REMOVED
+
+      // Fetch candidates to populate the voting form
+      await fetchAndDisplayCandidates();
+
+      registrationSection.style.display = "none";
     } else {
       console.error("Registration failed response:", result);
       registrationMessage.textContent = `Registration failed: ${
@@ -237,6 +254,7 @@ registerForm.addEventListener("submit", async (e) => {
       registrationMessage.className = "alert alert-danger";
       currentVoterId = null;
       votingSection.style.display = "none";
+      resultsSection.classList.add("d-none");
     }
   } catch (error) {
     console.error("Registration error:", error);
@@ -244,23 +262,26 @@ registerForm.addEventListener("submit", async (e) => {
     registrationMessage.className = "alert alert-danger";
     currentVoterId = null;
     votingSection.style.display = "none";
+    resultsSection.classList.add("d-none");
   }
 });
 
 // Handle Vote Form Submission
 voteForm.addEventListener("submit", (e) => {
-  // ... (keep as is) ...
   e.preventDefault();
   voteMessage.textContent = "";
+
   const selectedCandidateInput = document.querySelector(
     'input[name="candidate"]:checked'
   );
+
   if (!currentVoterId) {
     voteMessage.textContent =
       "Error: Voter ID not found. Please register first.";
     voteMessage.className = "alert alert-danger";
     return;
   }
+
   if (selectedCandidateInput) {
     const voteData = {
       candidateId: selectedCandidateInput.value,
@@ -284,19 +305,20 @@ registerAgainButton.addEventListener("click", () => {
 // --- Socket.IO Event Handlers ---
 
 socket.on("connect", () => {
-  console.log("SOCKET: Connected to Socket.IO server"); // <-- ADD LOG
-  // Fetch candidates immediately on connect
+  console.log("SOCKET: Connected to Socket.IO server");
+  // Fetch candidates immediately on connect to build UI structure early.
+  // This also builds the results structure but results section remains hidden.
   fetchAndDisplayCandidates();
 });
 
 socket.on("voteCounts", (voteCounts) => {
-  console.log("SOCKET: Received voteCounts event with:", voteCounts); // <-- ADD LOG
-  // The update function checks if the structure is ready
+  console.log("SOCKET: Received voteCounts event with:", voteCounts);
+  // Update the counts in the hidden results section.
+  // It will become visible only after a successful vote.
   updateVoteResultsDisplay(voteCounts);
 });
 
 socket.on("voteStatus", (data) => {
-  // ... (keep as is) ...
   if (data.success) {
     console.log("Vote successfully recorded by server.");
     voteMessage.textContent = "Vote successfully recorded!";
@@ -305,6 +327,10 @@ socket.on("voteStatus", (data) => {
       .querySelectorAll("input, button")
       .forEach((el) => (el.disabled = true));
     registerAgainButton.classList.remove("d-none");
+
+    // --- CHANGE: SHOW RESULTS SECTION ONLY ON VOTE SUCCESS ---
+    resultsSection.classList.remove("d-none");
+    // --- END CHANGE ---
   } else {
     console.error("Vote submission failed:", data.message);
     voteMessage.textContent = `Vote submission failed: ${data.message}`;
@@ -313,19 +339,25 @@ socket.on("voteStatus", (data) => {
       .querySelectorAll("input, button")
       .forEach((el) => (el.disabled = false));
     registerAgainButton.classList.add("d-none");
+    // Keep results hidden if vote fails
+    resultsSection.classList.add("d-none");
   }
 });
 
 socket.on("disconnect", () => {
-  console.log("SOCKET: Disconnected from Socket.IO server"); // <-- ADD LOG
-  voteResultsList.innerHTML = "<li>Disconnected. Trying to reconnect...</li>";
+  console.log("SOCKET: Disconnected from Socket.IO server");
+  if (!resultsSection.classList.contains("d-none")) {
+    voteResultsList.innerHTML =
+      "<li>Disconnected. Vote counts may be outdated.</li>";
+  }
 });
 
 // --- Initial Load ---
 votingSection.style.display = "none";
 mapContainer.style.display = "none";
 registrationSection.style.display = "block";
-// Clear results initially and set flag
-voteResultsList.innerHTML = "<li>Loading results...</li>";
-isResultsStructureBuilt = false; // Ensure flag is false initially
-console.log("Initial Load: UI set, isResultsStructureBuilt=false"); // <-- ADD LOG
+// Results section starts hidden via HTML class 'd-none'
+isResultsStructureBuilt = false;
+console.log(
+  "Initial Load: UI set, Results hidden, isResultsStructureBuilt=false"
+);
