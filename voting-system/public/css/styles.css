@@ -63,7 +63,7 @@ h1 {
     margin-top: 5px;
     font-size: 0.9em;
     display: none; 
-    color: #FDFFFC; 
+    color: #000000; 
     text-shadow: none;
 }
 
@@ -101,4 +101,16 @@ h1 {
 
 #registrationSection h2, label {
     color: #FDFFFC;
+}
+
+#votingSection h2, h4 {
+    color: #FDFFFC;
+}
+
+#votingSection h4 {
+    padding-top: 10px;
+}
+
+#votingSection h2 {
+    text-shadow: 2px 2px #006b9d;
 }
