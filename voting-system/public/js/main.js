@@ -4,7 +4,7 @@ const socket = io(); // Initialize the Socket.IO connection
 let currentVoterId = null;
 let map = null;
 let marker = null;
-let isCandidateStructureBuilt = false; // Flag to track if candidate card structure is ready
+let isCandidateStructureBuilt = false;
 
 // --- DOM Elements ---
 const registerForm = document.getElementById("registerForm");
@@ -15,14 +15,14 @@ const mapDiv = document.getElementById("map");
 
 const votingSection = document.getElementById("votingSection");
 const voteForm = document.getElementById("voteForm");
-const candidateListDiv = document.getElementById("candidateList"); // For voting radio buttons
+const candidateListDiv = document.getElementById("candidateList");
 const voteMessage = document.getElementById("voteMessage");
 const welcomeVoterP = document.getElementById("welcomeVoter");
 
-// resultsSection and voteResultsList are removed
+// Removed resultsSection and voteResultsList references
 
 const registerAgainButton = document.getElementById("registerAgainButton");
-const candidateInfoListDiv = document.getElementById("candidateInfoList"); // For top display
+const candidateInfoListDiv = document.getElementById("candidateInfoList");
 
 // --- Functions ---
 
@@ -51,11 +51,9 @@ function initializeMap(lat, lng, addressString) {
   mapContainer.style.display = "block";
 }
 
-// Populate Candidate Info Display Area (Top Section) - Includes HIDDEN Vote Count Span
+// Populate Candidate Info Display Area (Top Section) - NOW CLICKABLE
 function displayCandidateInfo(candidates) {
-  console.log(
-    "Populating candidate info display area (counts initially hidden)..."
-  );
+  console.log("Populating clickable candidate info display area...");
   if (!candidateInfoListDiv) {
     return;
   }
@@ -69,10 +67,12 @@ function displayCandidateInfo(candidates) {
 
   candidates.forEach((candidate) => {
     const candidateIdentifier = candidate.candidateId || candidate._id;
+
     const col = document.createElement("div");
     col.className = "col-6 col-md-3";
     const card = document.createElement("div");
-    card.className = "candidate-display-card"; // Reference for styling
+    card.className = "candidate-display-card"; // Base class
+    card.dataset.candidateId = candidateIdentifier; // Store candidate ID on the card
 
     const img = document.createElement("img");
     img.src =
@@ -89,26 +89,71 @@ function displayCandidateInfo(candidates) {
     partyPara.className = "mb-0 small text-muted";
     partyPara.textContent = `(${candidate.party})`;
 
-    // Vote Count Display Element (Initially hidden by CSS)
     const countPara = document.createElement("p");
-    countPara.className = "vote-count mt-1"; // Class to target for show/hide via CSS/JS
+    countPara.className = "vote-count mt-1"; // Initially hidden by CSS
     const countSpan = document.createElement("span");
-    countSpan.id = `card-votes-${candidateIdentifier}`; // Unique ID for count update
-    countSpan.textContent = "0"; // Start at 0
+    countSpan.id = `card-votes-${candidateIdentifier}`;
+    countSpan.textContent = "0";
     countSpan.className = "fw-bold";
     countPara.textContent = "Votes: ";
     countPara.appendChild(countSpan);
 
-    // Assemble the card
     card.appendChild(img);
     card.appendChild(namePara);
     card.appendChild(partyPara);
     card.appendChild(countPara);
     col.appendChild(card);
     candidateInfoListDiv.appendChild(col);
+
+    // --- ADD CLICK LISTENER TO THE CARD ---
+    card.addEventListener("click", () => {
+      // Only allow clicking if registered and vote form isn't disabled
+      if (
+        currentVoterId &&
+        !voteForm.querySelector('button[type="submit"]').disabled
+      ) {
+        const clickedCandidateId = card.dataset.candidateId;
+        console.log(`Candidate card clicked: ID ${clickedCandidateId}`);
+
+        // Find the corresponding radio button in the voting form
+        const radioBtn = voteForm.querySelector(
+          `input[name="candidate"][value="${clickedCandidateId}"]`
+        );
+
+        if (radioBtn) {
+          radioBtn.checked = true; // Check the radio button
+
+          // Remove selection class from all cards
+          candidateInfoListDiv
+            .querySelectorAll(".candidate-display-card")
+            .forEach((c) => {
+              c.classList.remove("selected-for-vote");
+            });
+          // Add selection class to the clicked card
+          card.classList.add("selected-for-vote");
+
+          console.log(
+            `Radio button for candidate ${clickedCandidateId} checked.`
+          );
+        } else {
+          console.warn(
+            `Could not find radio button for candidate ID ${clickedCandidateId}`
+          );
+        }
+      } else {
+        if (!currentVoterId) {
+          console.log("Card clicked, but user not registered yet.");
+          // Optionally provide feedback e.g., alert("Please register before selecting a candidate.");
+        } else {
+          console.log(
+            "Card clicked, but voting is already complete for this session."
+          );
+        }
+      }
+    });
+    // --- END CLICK LISTENER ---
   });
-  // Hide counts explicitly on rebuild too (belt and braces)
-  hideAllVoteCounts();
+  hideAllVoteCounts(); // Ensure counts are hidden initially
 }
 
 // Fetch Candidates and Populate Displays
@@ -118,7 +163,6 @@ async function fetchAndDisplayCandidates() {
   candidateListDiv.innerHTML = "<p>Loading candidates...</p>";
   candidateInfoListDiv.innerHTML =
     '<p class="text-center">Loading candidates...</p>';
-  // voteResultsList removed
 
   try {
     console.log("FETCH: Fetching candidates from /api/candidates...");
@@ -129,7 +173,7 @@ async function fetchAndDisplayCandidates() {
     const candidates = await response.json();
     console.log("FETCH: Candidates received:", candidates);
 
-    // Populate Candidate Info Display (Top Section)
+    // Populate Candidate Info Display (makes cards clickable)
     displayCandidateInfo(candidates);
 
     // Populate Candidate Voting List (Radio Buttons)
@@ -151,11 +195,10 @@ async function fetchAndDisplayCandidates() {
       candidateListDiv.appendChild(label);
     });
 
-    // --- Set Flag and Request Counts ---
     console.log("FETCH: Setting isCandidateStructureBuilt = true");
     isCandidateStructureBuilt = true;
     console.log("FETCH: Emitting getInitialCounts.");
-    socket.emit("getInitialCounts"); // Counts updated in background, remain hidden by default
+    socket.emit("getInitialCounts");
   } catch (error) {
     console.error("FETCH: Error fetching or displaying candidates:", error);
     candidateListDiv.innerHTML =
@@ -166,12 +209,12 @@ async function fetchAndDisplayCandidates() {
   }
 }
 
-// --- NEW HELPER FUNCTIONS for Visibility ---
+// Helper Functions for Visibility
 function showAllVoteCounts() {
   const countElements = candidateInfoListDiv.querySelectorAll(".vote-count");
   console.log(`Showing ${countElements.length} vote count elements.`);
   countElements.forEach((el) => {
-    el.style.display = "block"; // Or 'inline', depending on desired layout
+    el.style.display = "block";
   });
 }
 
@@ -182,7 +225,6 @@ function hideAllVoteCounts() {
     el.style.display = "none";
   });
 }
-// --- END HELPER FUNCTIONS ---
 
 // Function to reset the UI back to the registration state
 function resetToRegisterState() {
@@ -192,6 +234,14 @@ function resetToRegisterState() {
   registerAgainButton.classList.add("d-none");
   registrationSection.style.display = "block";
   hideAllVoteCounts(); // Hide counts on reset
+
+  // --- Remove visual selection from candidate cards ---
+  candidateInfoListDiv
+    .querySelectorAll(".candidate-display-card")
+    .forEach((c) => {
+      c.classList.remove("selected-for-vote");
+    });
+  // --- End change ---
 
   registrationMessage.textContent = "";
   registrationMessage.className = "";
@@ -204,10 +254,10 @@ function resetToRegisterState() {
     .forEach((el) => (el.disabled = false));
   currentVoterId = null;
 
-  candidateListDiv.innerHTML = "<p>Loading candidates...</p>"; // Reset voting form list too
-  isCandidateStructureBuilt = false; // Reset flag
+  candidateListDiv.innerHTML = "<p>Loading candidates...</p>";
+  isCandidateStructureBuilt = false;
 
-  // Re-fetch candidates to ensure top display and voting form are ready for next user
+  // Re-fetch candidates to reset displays correctly
   console.log("RESET: Triggering fetchAndDisplayCandidates after reset.");
   fetchAndDisplayCandidates();
 
@@ -253,8 +303,7 @@ registerForm.addEventListener("submit", async (e) => {
       votingSection.style.display = "block"; // Show voting section
       registrationSection.style.display = "none"; // Hide registration form
 
-      // Counts remain hidden here, only shown after vote success
-      // Ensure structure is ready and request latest counts for background update
+      // Ensure latest counts are shown in the top display (already built)
       if (isCandidateStructureBuilt) {
         console.log(
           "Registration success: Requesting counts for background update..."
@@ -318,21 +367,18 @@ registerAgainButton.addEventListener("click", () => {
 
 socket.on("connect", () => {
   console.log("SOCKET: Connected to Socket.IO server");
-  // Fetch candidates immediately on connect to build all UI structures early
   fetchAndDisplayCandidates();
 });
 
-// Update counts in the background (targeting spans inside candidate cards)
+// Update counts in the background
 socket.on("voteCounts", (voteCounts) => {
   console.log("SOCKET: Received voteCounts event with:", voteCounts);
-
   if (!isCandidateStructureBuilt) {
     console.warn(
       "SOCKET: Candidate structure not built yet. Ignoring background count update."
     );
-    return; // Don't try to update if structure isn't ready
+    return;
   }
-
   console.log(
     "SOCKET: Updating background counts in candidate cards:",
     voteCounts
@@ -349,6 +395,7 @@ socket.on("voteCounts", (voteCounts) => {
   }
 });
 
+// Handle vote success/failure
 socket.on("voteStatus", (data) => {
   if (data.success) {
     console.log("Vote successfully recorded by server.");
@@ -358,10 +405,14 @@ socket.on("voteStatus", (data) => {
       .querySelectorAll("input, button")
       .forEach((el) => (el.disabled = true));
     registerAgainButton.classList.remove("d-none");
-
-    // --- Make the vote counts visible ---
-    showAllVoteCounts();
-    // --- End Change ---
+    showAllVoteCounts(); // Show counts integrated into cards
+    // Remove selection highlight after successful vote
+    candidateInfoListDiv
+      .querySelectorAll(".candidate-display-card")
+      .forEach((c) => {
+        c.classList.remove("selected-for-vote");
+        c.style.cursor = "default"; // Make non-clickable after vote
+      });
   } else {
     console.error("Vote submission failed:", data.message);
     voteMessage.textContent = `Vote submission failed: ${data.message}`;
@@ -370,21 +421,18 @@ socket.on("voteStatus", (data) => {
       .querySelectorAll("input, button")
       .forEach((el) => (el.disabled = false));
     registerAgainButton.classList.add("d-none");
-    // Ensure counts remain hidden if vote fails
-    hideAllVoteCounts();
+    hideAllVoteCounts(); // Ensure counts remain hidden if vote fails
   }
 });
 
 socket.on("disconnect", () => {
   console.log("SOCKET: Disconnected from Socket.IO server");
-  // Optionally indicate disconnection in the UI if needed
 });
 
 // --- Initial Load ---
 votingSection.style.display = "none";
 mapContainer.style.display = "none";
 registrationSection.style.display = "block";
-// Candidate counts start hidden via CSS
 isCandidateStructureBuilt = false;
 console.log(
   "Initial Load: UI set, Candidate counts hidden, isCandidateStructureBuilt=false"
