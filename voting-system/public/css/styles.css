@@ -45,6 +45,19 @@ button:hover {
     margin-top: 30px;
 }
 
+.candidate-display-card {
+    margin-left: auto;
+    margin-right: auto;
+    width: 200px;
+    height: 200px;
+}
+
 .candidate-display-card .vote-count {
     display: none;
+}
+
+.candidate-display-card img {
+    border-radius: 50%;
+    width: 80px;
+    height: 80px;
 }
