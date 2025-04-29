@@ -143,6 +143,13 @@ Before you begin, ensure you have the following installed and configured:
     * Exit the shell: `.exit`
     *(Note: If you already have candidate data without images, use `db.candidates.updateOne({ candidateId: ID }, { $set: { imageUrl: "URL" } });` for each candidate instead).*
 
+     **To reset the Data**
+     * Open the MongoDB Shell: `mongosh`
+     * Switch to the database: `use votingSystem`
+     * Drop the database: `db.dropDatabase();`
+     * (OPTIONAL use only if you want to clear the user cahce and/or doing a full reset):
+         * Remove users: `db.dropAllUsers();`
+
 3.  **Start the Node.js Server:**
     *(Keep this subsection as is)*
     * **For Development (recommended):**
