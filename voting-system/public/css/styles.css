@@ -44,3 +44,7 @@ button:hover {
 #voteResults {
     margin-top: 30px;
 }
+
+.candidate-display-card .vote-count {
+    display: none;
+}
