@@ -135,7 +135,7 @@ Before you begin, ensure you have the following installed and configured:
             firstName: "Bombardino",
             lastName: "Crocodilo",
             party: "Party B",
-            imageUrl: "https://static.wikia.nocookie.net/brainrotnew/images/1/10/Bombardiro_Crocodilo.jpg/revision/latest?cb=20250417102447"
+            imageUrl: "https://images.cults3d.com/5rRxNhuOB_layW1t4n8hVfJ21Ik=/516x516/filters:no_upscale()/https://fbi.cults3d.com/uploaders/30399929/illustration-file/3106e2a6-04ce-4117-8a2a-24b75a699fd4/untitled.506.png"
           }
         ]);
         ```
