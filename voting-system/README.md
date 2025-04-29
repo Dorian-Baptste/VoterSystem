@@ -125,8 +125,8 @@ Before you begin, ensure you have the following installed and configured:
            },
           {
             candidateId: 3,
-            firstName: "Diddy",
-            lastName: "Dhanraj",
+            firstName: "Meggy",
+            lastName: "Weggy",
             party: "Party B",
             imageUrl: "https://upload.wikimedia.org/wikipedia/en/6/67/Herbert_-_Family_Guy.png"
           },
