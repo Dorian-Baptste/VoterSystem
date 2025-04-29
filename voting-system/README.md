@@ -114,28 +114,28 @@ Before you begin, ensure you have the following installed and configured:
             firstName: "Marcus",
             lastName: "Ching",
             party: "Party A",
-            imageUrl: "[https://lh4.googleusercontent.com/proxy/J0E_Di1ggQTeLHAQAl0SDU6hyDXS8yk-1YzC4yTttJDeY-VZf1jAALQj5BsrhimTjPIj9BhVlzJxUZB441j8wpSoDMDVC317afEjyCBgcsPUTw]"
+            imageUrl: "https://lh4.googleusercontent.com/proxy/J0E_Di1ggQTeLHAQAl0SDU6hyDXS8yk-1YzC4yTttJDeY-VZf1jAALQj5BsrhimTjPIj9BhVlzJxUZB441j8wpSoDMDVC317afEjyCBgcsPUTw"
           },
           {
             candidateId: 2,
             firstName: "Darius",
             lastName: "",
             party: "Party A",
-            imageUrl: "[https://img.freepik.com/premium-photo/black-child-with-afro-happy-having-fun-white-background-pixar-style2_27550-4938.jpg]"
+            imageUrl: "https://img.freepik.com/premium-photo/black-child-with-afro-happy-having-fun-white-background-pixar-style2_27550-4938.jpg"
            },
           {
             candidateId: 3,
             firstName: "Diddy",
             lastName: "Dhanraj",
             party: "Party B",
-            imageUrl: "[https://upload.wikimedia.org/wikipedia/en/6/67/Herbert_-_Family_Guy.png]"
+            imageUrl: "https://upload.wikimedia.org/wikipedia/en/6/67/Herbert_-_Family_Guy.png"
           },
           {
             candidateId: 4,
             firstName: "Bombardino",
             lastName: "Crocodilo",
             party: "Party B",
-            imageUrl: "[https://static.wikia.nocookie.net/brainrotnew/images/1/10/Bombardiro_Crocodilo.jpg/revision/latest?cb=20250417102447]"
+            imageUrl: "https://static.wikia.nocookie.net/brainrotnew/images/1/10/Bombardiro_Crocodilo.jpg/revision/latest?cb=20250417102447"
           }
         ]);
         ```
