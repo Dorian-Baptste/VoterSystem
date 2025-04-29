@@ -92,50 +92,77 @@ Before you begin, ensure you have the following installed and configured:
 ## Running the Application
 
 1.  **Ensure MongoDB is Running:**
-    Your MongoDB server **must** be running before starting the application.
-    * **macOS (using Homebrew Service):**
+    *(Keep this subsection as is)*
+    Before starting the Node.js application, your MongoDB server **must** be running.
+    * **macOS (using Homebrew Service - Recommended):**
         * Check status: `brew services list` (Look for `mongodb-community`, status should be `started`).
         * Start if stopped: `brew services start mongodb-community`.
     * **Linux (using systemd):**
         * Check status: `sudo systemctl status mongod` (Look for `active (running)`).
         * Start if stopped: `sudo systemctl start mongod`.
-    * **Other Methods:** Use the appropriate command to start your MongoDB server. Ensure it's accessible at `mongodb://localhost:27017` (or update the URI in `config/config.js`).
+    * **Other Methods:** Follow the specific instructions for how you run MongoDB. Ensure it's listening on `localhost:27017` (or update `config/config.js` if different).
 
 2.  **Seed Candidate Data (One-Time Step):**
-    The application needs candidate data in the database to function correctly.
+    The application needs initial candidate data in the database, including names, parties, and image URLs. If starting with an empty `candidates` collection:
     * Open the MongoDB Shell: `mongosh`
     * Switch to the database: `use votingSystem`
-    * Insert the candidates:
-    
+    * Run the following command to insert the candidates. **IMPORTANT:** Replace the placeholder `imageUrl` values with actual, valid URLs for your candidate images.
+        ```javascript
         db.candidates.insertMany([
-          { candidateId: 1, firstName: "Marcus", lastName: "Ching", party: "Party A" },
-          { candidateId: 2, firstName: "Darius", lastName: "", party: "Party A" }, // Add last name if applicable
-          { candidateId: 3, firstName: "Diddy", lastName: "Dhanraj", party: "Party B" },
-          { candidateId: 4, firstName: "Bombardino", lastName: "Crocodilo", party: "Party B" }
+          {
+            candidateId: 1,
+            firstName: "Marcus",
+            lastName: "Ching",
+            party: "Party A",
+            // Replace with actual image URL
+            imageUrl: "[https://via.placeholder.com/100/A00/FFF?text=MC](https://via.placeholder.com/100/A00/FFF?text=MC)"
+          },
+          {
+            candidateId: 2,
+            firstName: "Darius",
+            lastName: "", // Add last name if applicable
+            party: "Party A",
+            // Replace with actual image URL
+            imageUrl: "[https://via.placeholder.com/100/0A0/FFF?text=D](https://via.placeholder.com/100/0A0/FFF?text=D)"
+           },
+          {
+            candidateId: 3,
+            firstName: "Diddy",
+            lastName: "Dhanraj",
+            party: "Party B",
+            // Replace with actual image URL
+            imageUrl: "[https://via.placeholder.com/100/00A/FFF?text=DD](https://via.placeholder.com/100/00A/FFF?text=DD)"
+          },
+          {
+            candidateId: 4,
+            firstName: "Bombardino",
+            lastName: "Crocodilo",
+            party: "Party B",
+            // Replace with actual image URL
+            imageUrl: "[https://via.placeholder.com/100/A50/FFF?text=BC](https://via.placeholder.com/100/A50/FFF?text=BC)"
+          }
         ]);
         ```
-    * Verify with `db.candidates.find();` and exit (`.exit`).
-    
-    **To reset the Data**
-    * Open the MongoDB Shell: `mongosh`
-    * Switch to the database: `use votingSystem`
-    * Drop the database: `db.dropDatabase();`
-    * (OPTIONAL use only if you want to clear the user cahce and/or doing a full reset):
-        * Remove users: `db.dropAllUsers();`
+    * Verify the data was inserted correctly: `db.candidates.find().pretty();`
+    * Exit the shell: `.exit`
+    *(Note: If you already have candidate data without images, use `db.candidates.updateOne({ candidateId: ID }, { $set: { imageUrl: "URL" } });` for each candidate instead).*
 
 3.  **Start the Node.js Server:**
-    * **Development Mode (recommended):** Uses `nodemon` for auto-restarts on file changes.
+    *(Keep this subsection as is)*
+    * **For Development (recommended):**
         ```bash
         npm run dev
         ```
-    * **Production Mode:**
+    * **For Production:**
         ```bash
         npm start
         ```
     * Look for the console messages: `Server is running on port 3000` (or your specified port) and `MongoDB Connected`.
 
 4.  **Access the Application:**
-    Open your web browser to `http://localhost:3000` (or the correct port).
+    *(Keep this subsection as is)*
+    Open your web browser and navigate to `http://localhost:3000` (or the correct port).
+
 
 ## Troubleshooting
 
