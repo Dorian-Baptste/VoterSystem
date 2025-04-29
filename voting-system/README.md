@@ -1,88 +1,145 @@
 # Voting System
 
 ## Overview
-This project is a web-based voting system where users can register, verify their address, and vote for one of four candidates. The system includes real-time voting updates and an accessible map for visually impaired users.
-
-## Installation
-
-### 1. Clone the repository:
-```sh
-git clone https://github.com/yourusername/voting-system.git
-cd voting-system
-```
-
-### 2. Install dependencies:
-Run the following command to install all required dependencies:
-```sh
-npm install
-```
-
-#### **Dependencies Installed:**
-| Dependency  | Purpose |
-|-------------|---------|
-| `express` | Handles routing and server logic |
-| `mongoose` | Connects to MongoDB for database operations |
-| `socket.io` | Enables real-time communication for vote updates |
-| `axios` | Makes HTTP requests (used for Google Maps API) |
-
-#### **Development Dependencies:**
-| Dependency  | Purpose |
-|-------------|---------|
-| `nodemon` | Automatically restarts the server during development when files change |
-
-If you need to install dependencies manually, use:
-```sh
-npm install express mongoose socket.io axios
-```
-To install `nodemon` (for development):
-```sh
-npm install nodemon --save-dev
-```
-
-### 3. Start the application
-before running the server make sure you are in the voting-system file path
-To run the server, use:
-```sh
-npm start
-```
-For development mode (with automatic server restart):
-```sh
-npm run dev
-```
+This project is a web-based voting system where users can register, verify their address using Google Maps Geocoding API, vote for one of several candidates, and see live results via Socket.IO. It aims to provide an accessible map interface for visually impaired users (using Leaflet).
 
 ## Features
-- User registration and address verification
-- Voting for one of four candidates
-- Real-time updates with Socket.IO
-- Accessible map for visually impaired users
+- User registration and address verification (Google Maps Geocoding)
+- Visual map display of verified address (Leaflet)
+- Voting for one of four candidates across two parties
+- Real-time vote count updates using Socket.IO
+- (Goal: Enhance map display for accessibility)
+
+## Technologies Used
+
+* **Frontend:** HTML, CSS, JavaScript, Bootstrap 5 (via CDN), Socket.IO Client, Leaflet.js (via CDN)
+* **Backend:** Node.js, Express.js, Mongoose, Socket.IO Server, Axios, Dotenv
+* **Database:** MongoDB
+* **APIs:** Google Maps Geocoding API
+* **Development:** nodemon
 
 ## Project Structure
-```
 /voting-system
 │-- /public
-│   │-- /css/styles.css
-│   │-- /js/main.js
-│   │-- index.html
+│   │-- /css/styles.css     # Custom CSS overrides
+│   │-- /js/main.js         # Frontend JavaScript (UI logic, Socket.IO client, Leaflet map)
+│   │-- index.html          # Main HTML file
 │-- /src
 │   │-- /controllers
-│   │   │-- userController.js
-│   │   │-- voteController.js
+│   │   │-- userController.js # Handles user registration logic
+│   │   │-- voteController.js # (Minimal - voting logic primarily in app.js Socket.IO)
 │   │-- /models
-│   │   │-- voterModel.js
-│   │   │-- addressModel.js
-│   │   │-- voteModel.js
+│   │   │-- voterModel.js     # Mongoose schema for voters
+│   │   │-- addressModel.js   # Mongoose schema for addresses
+│   │   │-- voteModel.js      # Mongoose schema for votes
+│   │   │-- candidateModel.js # Mongoose schema for candidates
 │   │-- /routes
-│   │   │-- userRoutes.js
-│   │   │-- voteRoutes.js
+│   │   │-- userRoutes.js     # API routes for user actions (/api/users)
+│   │   │-- voteRoutes.js     # (Minimal - /api/votes)
 │   │-- /services
-│   │   │-- googleMapsService.js
-│   │-- app.js
+│   │   │-- googleMapsService.js # Handles Google Geocoding API calls
+│   │-- app.js                # Main Express server setup, Socket.IO handling, DB connection
 │-- /config
-│   │-- config.js
-│-- .env
-│-- package.json
-│-- README.md
-```
+│   │-- config.js           # Configuration (DB URI reference)
+│-- .env                    # Environment variables (API Key) - MUST BE CREATED
+│-- .gitignore              # Specifies intentionally untracked files (add .env!)
+│-- package.json            # Project metadata and dependencies
+│-- package-lock.json       # Exact dependency versions
+│-- README.md               # This file
+
+
+## Prerequisites
+Before you begin, ensure you have the following installed and configured:
+* **Node.js and npm:** (LTS version recommended) [Download Node.js](https://nodejs.org/)
+* **MongoDB:** The database must be installed and **running** locally. See guides: [Install MongoDB Community Edition](https://www.mongodb.com/docs/manual/installation/). (Homebrew is recommended for macOS).
+* **Git:** For cloning the repository. [Download Git](https://git-scm.com/).
+* **Google Maps API Key:** An active API key from Google Cloud Console is required. Ensure:
+    * The **Geocoding API** is enabled for your project.
+    * The project is linked to an active **Billing Account**.
+    * The key has appropriate restrictions (or none for initial testing). Get started: [Google Cloud Console](https://console.cloud.google.com/).
+
+## Installation and Setup
+
+1.  **Clone the Repository:**
+    ```sh
+    # Replace <your-repository-url> if you forked the project
+    git clone <your-repository-url>
+    cd voting-system
+    ```
+
+2.  **Install Dependencies:**
+    This command installs all necessary packages defined in `package.json`.
+    ```sh
+    npm install
+    ```
+
+3.  **Create and Configure `.env` File:**
+    This file stores your secret API key. Create a file named exactly `.env` in the project root (`voting-system/`). Add your Google Maps API Key:
+    ```dotenv
+    # .env file
+    # Replace YOUR_ACTUAL_GOOGLE_MAPS_GEOCODING_API_KEY with your actual key from Google Cloud Console
+    GOOGLE_MAPS_API_KEY=YOUR_ACTUAL_GOOGLE_MAPS_GEOCODING_API_KEY
+
+    # Optional: You can also specify the port here if needed
+    # PORT=3001
+    ```
+    **Security:** Add `.env` to your `.gitignore` file immediately to avoid committing secrets. If `.gitignore` doesn't exist, create it and add:
+    ```
+    node_modules/
+    .env
+    ```
+
+## Running the Application
+
+1.  **Ensure MongoDB is Running:**
+    Your MongoDB server **must** be running before starting the application.
+    * **macOS (using Homebrew Service):**
+        * Check status: `brew services list` (Look for `mongodb-community`, status should be `started`).
+        * Start if stopped: `brew services start mongodb-community`.
+    * **Linux (using systemd):**
+        * Check status: `sudo systemctl status mongod` (Look for `active (running)`).
+        * Start if stopped: `sudo systemctl start mongod`.
+    * **Other Methods:** Use the appropriate command to start your MongoDB server. Ensure it's accessible at `mongodb://localhost:27017` (or update the URI in `config/config.js`).
+
+2.  **Seed Candidate Data (One-Time Step):**
+    The application needs candidate data in the database to function correctly.
+    * Open the MongoDB Shell: `mongosh`
+    * Switch to the database: `use votingSystem`
+    * Insert the candidates:
+        ```js
+        db.candidates.insertMany([
+          { candidateId: 1, firstName: "Marcus", lastName: "Ching", party: "Party A" },
+          { candidateId: 2, firstName: "Darius", lastName: "", party: "Party A" }, // Add last name if applicable
+          { candidateId: 3, firstName: "Diddy", lastName: "Dhanraj", party: "Party B" },
+          { candidateId: 4, firstName: "Bombardino", lastName: "Crocodilo", party: "Party B" }
+        ]);
+        ```
+    * Verify with `db.candidates.find();` and exit (`.exit`).
+
+3.  **Start the Node.js Server:**
+    * **Development Mode (recommended):** Uses `nodemon` for auto-restarts on file changes.
+        ```bash
+        npm run dev
+        ```
+    * **Production Mode:**
+        ```bash
+        npm start
+        ```
+    * Look for the console messages: `Server is running on port 3000` (or your specified port) and `MongoDB Connected`.
+
+4.  **Access the Application:**
+    Open your web browser to `http://localhost:3000` (or the correct port).
+
+## Troubleshooting
+
+* **Errors on Startup (`ECONNREFUSED`, Mongoose Timeouts):** MongoDB is likely not running or inaccessible. Double-check Step 1 in "Running the Application". Verify the database connection string in `config/config.js`.
+* **Registration Fails (`Error contacting Google Maps API`):**
+    * Verify the `GOOGLE_MAPS_API_KEY` in `.env` is correct and the file is saved properly.
+    * Confirm the **Geocoding API** is enabled in Google Cloud Console.
+    * Ensure the linked **Billing Account** is active in Google Cloud Console.
+    * Check API key **restrictions** in Google Cloud Console (temporarily disable for testing if needed).
+    * Restart the Node.js server after any changes to `.env`.
+* **Candidates Don't Load / Voting Disabled:** Ensure you completed the "Seed Candidate Data" step (Step 2 in Running the Application). Check the `candidates` collection in your `votingSystem` database using `mongosh`.
 
 ## License
 This project is licensed under the MIT License.
