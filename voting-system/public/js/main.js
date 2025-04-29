@@ -143,7 +143,6 @@ function displayCandidateInfo(candidates) {
       } else {
         if (!currentVoterId) {
           console.log("Card clicked, but user not registered yet.");
-          // Optionally provide feedback e.g., alert("Please register before selecting a candidate.");
         } else {
           console.log(
             "Card clicked, but voting is already complete for this session."
@@ -153,7 +152,7 @@ function displayCandidateInfo(candidates) {
     });
     // --- END CLICK LISTENER ---
   });
-  hideAllVoteCounts(); // Ensure counts are hidden initially
+  hideAllVoteCounts(); 
 }
 
 // Fetch Candidates and Populate Displays
@@ -272,7 +271,7 @@ registerForm.addEventListener("submit", async (e) => {
   console.log("Registration form submitted.");
   registrationMessage.textContent = "Registering and verifying address...";
   mapContainer.style.display = "none";
-  hideAllVoteCounts(); // Ensure counts are hidden
+  hideAllVoteCounts(); 
 
   const formData = new FormData(registerForm);
   const data = Object.fromEntries(formData.entries());
@@ -370,7 +369,6 @@ socket.on("connect", () => {
   fetchAndDisplayCandidates();
 });
 
-// Update counts in the background
 socket.on("voteCounts", (voteCounts) => {
   console.log("SOCKET: Received voteCounts event with:", voteCounts);
   if (!isCandidateStructureBuilt) {
@@ -395,7 +393,6 @@ socket.on("voteCounts", (voteCounts) => {
   }
 });
 
-// Handle vote success/failure
 socket.on("voteStatus", (data) => {
   if (data.success) {
     console.log("Vote successfully recorded by server.");
@@ -405,13 +402,13 @@ socket.on("voteStatus", (data) => {
       .querySelectorAll("input, button")
       .forEach((el) => (el.disabled = true));
     registerAgainButton.classList.remove("d-none");
-    showAllVoteCounts(); // Show counts integrated into cards
-    // Remove selection highlight after successful vote
+    showAllVoteCounts(); 
+
     candidateInfoListDiv
       .querySelectorAll(".candidate-display-card")
       .forEach((c) => {
         c.classList.remove("selected-for-vote");
-        c.style.cursor = "default"; // Make non-clickable after vote
+        c.style.cursor = "default"; 
       });
   } else {
     console.error("Vote submission failed:", data.message);
