@@ -7,6 +7,7 @@ let marker = null; // Leaflet marker instance
 
 // --- DOM Elements ---
 const registerForm = document.getElementById("registerForm");
+const registrationSection = document.getElementById("registrationSection"); // Get reference
 const registrationMessage = document.getElementById("registrationMessage");
 const mapContainer = document.getElementById("mapContainer");
 const mapDiv = document.getElementById("map");
@@ -19,6 +20,9 @@ const welcomeVoterP = document.getElementById("welcomeVoter");
 
 const resultsSection = document.getElementById("resultsSection");
 const voteResultsList = document.getElementById("voteResultsList");
+
+// --- NEW: Get reference to the new button ---
+const registerAgainButton = document.getElementById("registerAgainButton");
 
 // --- Functions ---
 
@@ -124,6 +128,40 @@ function updateVoteResultsDisplay(voteCounts, candidates = []) {
   }
 }
 
+// Function to reset the UI back to the registration state
+function resetToRegisterState() {
+  // Hide voting section and map
+  votingSection.style.display = "none";
+  mapContainer.style.display = "none";
+
+  // Hide the 'Register Another' button itself
+  registerAgainButton.classList.add("d-none"); // Use Bootstrap class
+
+  // Show registration section
+  registrationSection.style.display = "block";
+
+  // Clear messages
+  registrationMessage.textContent = "";
+  registrationMessage.className = "";
+  voteMessage.textContent = "";
+  voteMessage.className = "";
+
+  // Reset forms
+  registerForm.reset();
+  voteForm.reset();
+
+  // Re-enable voting form elements for the next user
+  voteForm
+    .querySelectorAll("input, button")
+    .forEach((el) => (el.disabled = false));
+
+  // Clear state variable
+  currentVoterId = null;
+
+  // Optional: Clear candidate list if you want it re-fetched on next registration
+  // candidateListDiv.innerHTML = '<p>Loading candidates...</p>';
+}
+
 // --- Event Listeners ---
 
 // Handle Registration Form Submission
@@ -162,9 +200,9 @@ registerForm.addEventListener("submit", async (e) => {
       welcomeVoterP.textContent = `Welcome, ${data.firstName}! Please cast your vote.`;
       votingSection.style.display = "block";
       await fetchAndDisplayCandidates(); // Fetch candidates after successful registration
-      registerForm.reset(); // Clear registration form
+      // registerForm.reset(); // Reset happens when 'Register Another' is clicked now
       // Optionally hide registration form after success
-      document.getElementById("registrationSection").style.display = "none";
+      registrationSection.style.display = "none"; // Hide registration
     } else {
       registrationMessage.textContent = `Registration failed: ${
         result.message || "Unknown error"
@@ -209,16 +247,18 @@ voteForm.addEventListener("submit", (e) => {
     socket.emit("submitVote", voteData);
 
     // Provide feedback and potentially disable form
-    voteMessage.textContent = "Your vote has been submitted!";
-    voteMessage.className = "alert alert-success";
-    // Disable form inputs after voting
-    voteForm
-      .querySelectorAll("input, button")
-      .forEach((el) => (el.disabled = true));
+    voteMessage.textContent = "Submitting your vote...";
+    voteMessage.className = "alert alert-info";
+    // Don't disable form here, wait for server confirmation in 'voteStatus' listener
   } else {
     voteMessage.textContent = "Please select a candidate before submitting.";
     voteMessage.className = "alert alert-warning";
   }
+});
+
+// --- NEW: Add event listener for the 'Register Another Voter' button ---
+registerAgainButton.addEventListener("click", () => {
+  resetToRegisterState();
 });
 
 // --- Socket.IO Event Handlers ---
@@ -226,36 +266,40 @@ voteForm.addEventListener("submit", (e) => {
 // Listen for connection confirmation (optional)
 socket.on("connect", () => {
   console.log("Connected to Socket.IO server");
-  // Request initial candidates and counts when connected
-  fetchAndDisplayCandidates(); // Fetch candidates structure
+  // Request initial counts when connected (candidates fetched on demand now)
   socket.emit("getInitialCounts"); // Ask server for current counts
 });
 
 // Listen for vote count updates from the server
 socket.on("voteCounts", (voteCounts) => {
   console.log("Received updated vote counts:", voteCounts);
-  // Ensure the display structure is ready before updating counts
-  // If candidateListDiv is empty, it means candidates haven't loaded yet.
-  // updateVoteResultsDisplay handles this internally if candidates array is passed.
-  // We rely on fetchAndDisplayCandidates having run first.
+  // We need candidates to be loaded to display results correctly.
+  // This assumes fetchAndDisplayCandidates was called successfully before counts arrive.
   updateVoteResultsDisplay(voteCounts);
 });
 
-// Listen for vote confirmation/error (optional, good practice)
+// Listen for vote confirmation/error
 socket.on("voteStatus", (data) => {
   if (data.success) {
     console.log("Vote successfully recorded by server.");
-    // Message already shown optimistically, maybe update text slightly?
     voteMessage.textContent = "Vote successfully recorded!";
     voteMessage.className = "alert alert-success";
+    // Disable form inputs AFTER successful vote
+    voteForm
+      .querySelectorAll("input, button")
+      .forEach((el) => (el.disabled = true));
+    // --- NEW: Show the 'Register Another' button ---
+    registerAgainButton.classList.remove("d-none"); // Use Bootstrap class
   } else {
     console.error("Vote submission failed:", data.message);
     voteMessage.textContent = `Vote submission failed: ${data.message}`;
     voteMessage.className = "alert alert-danger";
-    // Re-enable form if vote failed server-side
+    // Keep form enabled if vote failed server-side
     voteForm
       .querySelectorAll("input, button")
       .forEach((el) => (el.disabled = false));
+    // Ensure 'Register Another' button remains hidden on failure
+    registerAgainButton.classList.add("d-none");
   }
 });
 
@@ -266,5 +310,8 @@ socket.on("disconnect", () => {
 });
 
 // --- Initial Load ---
-// Fetch initial data when the script loads (or wait for socket connection)
-// fetchAndDisplayCandidates(); // Moved to run after socket connection
+// Initial state: Show registration, hide voting and map.
+votingSection.style.display = "none";
+mapContainer.style.display = "none";
+registrationSection.style.display = "block";
+// Initial counts will be requested upon socket connection.
