@@ -106,7 +106,7 @@ Before you begin, ensure you have the following installed and configured:
     * Open the MongoDB Shell: `mongosh`
     * Switch to the database: `use votingSystem`
     * Insert the candidates:
-        ```js
+    
         db.candidates.insertMany([
           { candidateId: 1, firstName: "Marcus", lastName: "Ching", party: "Party A" },
           { candidateId: 2, firstName: "Darius", lastName: "", party: "Party A" }, // Add last name if applicable
